@@ -7,9 +7,7 @@
 Making a tictactoe game by giving 2 lines per row and the 3rd line for the 
 separator giving you a total play area space of 8 lines without the last row 
 having the separator
-It's currently a 2 player game where each player enters the row and column
-where they want to place their token and the person who matches 3 in a row
-horizontally, vertically or diagnolly wins. 
+It allows the user to choose to play between 2 players or a player with the computer
 */
 
 
