@@ -144,6 +144,8 @@ void computerTurn(struct Position positions[], char compToken){
     char playerToken = compToken == 'X' ? 'V' : 'X';
     int playerTokenCount = 0, compTokenCount = 0,  missingInnerIndex = -1, innerIndexTracked;
     int row = 0, column = 0;
+    int partialCompWinning = 0, compWinning = 0, playerWinning = 0;
+    int partialWinningPosition[2], compWinningPosition[2], playerWinningPosition[2];
 
     for (int outerIndex = 0; outerIndex < 8; outerIndex++){
         for (int innerIndex = 0; innerIndex < 3; innerIndex++){
@@ -164,15 +166,42 @@ void computerTurn(struct Position positions[], char compToken){
             //Or allow itself to win
             if (!innerIndexTracked){missingInnerIndex = innerIndex;}
         }
-        if ((compTokenCount == 2 && playerTokenCount == 0) || (playerTokenCount == 2 && compTokenCount == 0)){
-            row = winningPossibilities[outerIndex][missingInnerIndex][0];
-            column = winningPossibilities[outerIndex][missingInnerIndex][1];
-            checkAndInsertX_V(positions, row, column, compToken);
-            return;
+        if (compTokenCount == 2 && playerTokenCount == 0){ 
+            compWinningPosition[0] = winningPossibilities[outerIndex][missingInnerIndex][0];
+            compWinningPosition[1] = winningPossibilities[outerIndex][missingInnerIndex][1];
+            compWinning = 1;
+        }
+        if (playerTokenCount == 2 && compTokenCount == 0){
+            playerWinningPosition[0] = winningPossibilities[outerIndex][missingInnerIndex][0];
+            playerWinningPosition[1] = winningPossibilities[outerIndex][missingInnerIndex][1];
+            playerWinning = 1;
+        }
+        //Allows for the computer to start preparing to win in the game
+        if (compTokenCount == 1 && playerTokenCount == 0){
+            partialWinningPosition[0] = winningPossibilities[outerIndex][missingInnerIndex][0];
+            partialWinningPosition[1] = winningPossibilities[outerIndex][missingInnerIndex][1];
+            partialCompWinning = 1;
         }
         compTokenCount = playerTokenCount = 0;
         missingInnerIndex = -1;
     }
+
+    //The computer will give preference to itself winning first
+    //Then blocking the player token and in the end, if either of these is not true
+    //Preparing to win with the last condition
+    if (compWinning){
+        checkAndInsertX_V(positions, compWinningPosition[0], compWinningPosition[1], compToken);
+        return;
+    }
+    if (playerWinning){
+        checkAndInsertX_V(positions, playerWinningPosition[0], playerWinningPosition[1], compToken);
+        return;
+    }
+    if (partialCompWinning){
+        checkAndInsertX_V(positions, partialWinningPosition[0], partialWinningPosition[1], compToken);
+        return;
+    }
+    
     while (1){
         row = rand() % 3 + 1;
         column = rand() % 3 + 1;
@@ -183,11 +212,10 @@ void computerTurn(struct Position positions[], char compToken){
 int main()
 {
     srand(time(0));
-    int row, column, cur_player, randChooseCurPlayer;
+    int row, column, cur_player, randChooseCurPlayer, randChooseX_V;
     char X_V;
     struct Position positions[9];
     row = column = cur_player = 1;
-    int randChooseX_V = randChooseCurPlayer = rand() % 2 + 1;
     int compPosition[2];
     char winner, menuOption;
 
@@ -200,13 +228,15 @@ int main()
         scanf("%d", &menuOption);
         if (menuOption == 3) break;
         makeDatabase(positions);
-        printf("Enter the row and column to play");
+        randChooseCurPlayer = rand() % 2 + 1;
+        randChooseX_V = rand() % 2 + 1;
         makePlayArea(positions);
 
         while (1){
             X_V = cur_player == randChooseX_V ? 'X' : 'V';
 
             if (menuOption == 1 || cur_player == randChooseCurPlayer){
+                printf("Enter the row and column to play\n\n");
                 while (1){
                     printf("Player %d: \n", cur_player);
                     printf("Enter the row: ");
